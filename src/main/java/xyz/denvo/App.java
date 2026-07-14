@@ -46,9 +46,9 @@ public class App {
 
     private static void printUsage() {
         System.out.println("""
-            java-kgcheckin 1.0-SNAPSHOT
+            java-kgcheckin 1.1-SNAPSHOT
         
-            用法: java -jar kgcheckin-1.0-SNAPSHOT.jar <命令> [参数]
+            用法: java -jar kgcheckin-1.1-SNAPSHOT.jar <命令> [参数]
         
             命令:
                 checkin [--rsa-delay <ms>]       自动签到领取VIP (遍历users/目录, 可设置RSA延迟毫秒数)
@@ -56,10 +56,10 @@ public class App {
                 qrcodeLogin [--number N]        二维码登录 (N为账号数,默认1)
         
             示例:
-                java -jar kgcheckin-1.0-SNAPSHOT.jar checkin
-                java -jar kgcheckin-1.0-SNAPSHOT.jar checkin --rsa-delay 1200
-                java -jar kgcheckin-1.0-SNAPSHOT.jar phoneLogin --phone 12345678910
-                java -jar kgcheckin-1.0-SNAPSHOT.jar qrcodeLogin --number 2
+                java -jar kgcheckin-1.1-SNAPSHOT.jar checkin
+                java -jar kgcheckin-1.1-SNAPSHOT.jar checkin --rsa-delay 1200
+                java -jar kgcheckin-1.1-SNAPSHOT.jar phoneLogin --phone 12345678910
+                java -jar kgcheckin-1.1-SNAPSHOT.jar qrcodeLogin --number 2
         
             登录成功后用户信息自动保存到 users/<userid>.json
             """);
