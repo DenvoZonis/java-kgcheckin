@@ -58,11 +58,11 @@ java -jar target/kgcheckin-1.0-SNAPSHOT.jar <命令> [参数]
 
 ### 命令
 
-| 命令 | 说明 |
-|---|---|
-| `phoneLogin --phone <手机号>` | 手机验证码登录，发送验证码后提示输入验证码 |
-| `qrcodeLogin [--number N]` | 二维码登录，控制台输出二维码图片，N 为账号数量（默认 1） |
-| `checkin` | 遍历 `users/` 目录下所有已登录用户，自动签到领取 VIP |
+| 命令                           | 说明                                                                         |
+|------------------------------|----------------------------------------------------------------------------|
+| `phoneLogin --phone <手机号>`   | 手机验证码登录，发送验证码后提示输入验证码                                                      |
+| `qrcodeLogin [--number N]`   | 二维码登录，控制台输出二维码图片，N 为账号数量（默认 1）                                             |
+| `checkin [--rsa-delay <ms>]` | 遍历 `users/` 目录下所有已登录用户，自动签到领取 VIP。**新增 --rsa-delay 参数用于兼容低性能设备，详情请见下方说明。** |
 
 ### 示例
 
@@ -78,6 +78,27 @@ java -jar target/kgcheckin-1.0-SNAPSHOT.jar qrcodeLogin --number 3
 
 # 对所有已登录用户签到
 java -jar target/kgcheckin-1.0-SNAPSHOT.jar checkin
+
+# 对所有已登录用户签到（低性能 NAS/老电脑，提前补偿 1200 毫秒的时间戳）
+java -jar target/kgcheckin-1.0-SNAPSHOT.jar checkin --rsa-delay 1200
 ```
 
 登录成功后，用户凭证自动保存到 `users/<userid>.json`，后续 `checkin` 命令会自动加载。
+
+## FAQ
+
+### 为什么在 NAS 或低配置 Linux 上运行会提示 token过期或账号不存在？
+
+#### 现象：
+在高性能电脑（如 Windows/Mac）上运行一切正常，但将编译好的 jar 包或生成的 users/*.json 文件放到某些老旧 CPU（如 Intel J1800、N100 甚至某些 ARM 软路由）的 NAS 或 Linux 服务器上运行时，程序没有抛出 Java 异常，但会一直提示：
+token过期或账号不存在, userid: xxxx
+
+#### 原因：
+这不是 Token 真的过期了，而是底层算力不足导致的时间戳防重放拦截。
+酷狗 API 的加密验证极度依赖当前时间戳（clienttime），且防重放误差窗口极其严苛（通常在 1~2 秒内）。
+低性能机器在执行耗时的 RSA 非对称加密及建立网络 TLS 握手连接时，可能会耗费长达 1~3 秒的时间。当请求历经波折到达酷狗服务器时，请求体中包含的 clienttime 已经成为“过期”的旧时间，从而被官方 WAF 防火墙无情拦截并返回 20006 错误码。
+
+#### 解决方案：使用 --rsa-delay <ms> 参数
+
+你可以通过该参数人为增加一个“时间提前量”（毫秒）。
+例如，如果你的机器从“开始运行”到“发出网络请求”需要卡顿 1.2 秒，你可以加上 --rsa-delay 1200。程序会在生成时间戳时自动加上 1.2 秒的余量，等 CPU 吭哧吭哧算完加密并发出去时，时间戳到达官方服务器就会刚刚好，从而完美绕过风控拦截。

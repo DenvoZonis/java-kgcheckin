@@ -1,6 +1,7 @@
 package xyz.denvo.cli;
 
 import xyz.denvo.service.KugouApiService;
+import xyz.denvo.util.Config;
 import xyz.denvo.util.JsonHelper;
 import xyz.denvo.util.UserStore;
 import org.slf4j.Logger;
@@ -17,7 +18,8 @@ public class MainCheckin {
     private static final ZoneId BEIJING = ZoneId.of("Asia/Shanghai");
 
     @SuppressWarnings("unchecked")
-    public static void run() throws Exception {
+    public static void run(long rsaDelayMs) throws Exception {
+        Config.RSA_delay_ms = rsaDelayMs;
         List<Map<String, Object>> users = UserStore.loadAllUsers();
         if (users.isEmpty()) {
             LOG.error("users目录中没有用户文件，请先运行 phoneLogin 或 qrcodeLogin 登录");
@@ -42,6 +44,7 @@ public class MainCheckin {
 
             if (detailData == null || detailData.get("nickname") == null) {
                 LOG.error("token过期或账号不存在, userid: {}", userid);
+                LOG.error("如果上面两个日志的时间间隔较长（比如2s），请尝试调整RSA延迟，详见项目仓库Readme文件");
                 errorMsg.put("userid_" + userid, Map.of("msg", "token过期或账号不存在"));
                 continue;
             }

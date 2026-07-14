@@ -16,7 +16,13 @@ public class App {
 
         switch (command) {
             case "checkin":
-                MainCheckin.run();
+                long rsaDelay = 0;
+                for (int i = 0; i < remaining.length; i++) {
+                    if ("--rsa-delay".equals(remaining[i]) && i + 1 < remaining.length) {
+                        rsaDelay = Long.parseLong(remaining[++i]);
+                    }
+                }
+                MainCheckin.run(rsaDelay);
                 break;
             case "phonelogin":
                 PhoneLogin.run(remaining);
@@ -45,12 +51,13 @@ public class App {
             用法: java -jar kgcheckin-1.0-SNAPSHOT.jar <命令> [参数]
         
             命令:
-                checkin                         自动签到领取VIP (遍历users/目录)
+                checkin [--rsa-delay <ms>]       自动签到领取VIP (遍历users/目录, 可设置RSA延迟毫秒数)
                 phoneLogin --phone <手机号>      手机号登录 (发送验证码后通过标准输入输入验证码)
                 qrcodeLogin [--number N]        二维码登录 (N为账号数,默认1)
         
             示例:
                 java -jar kgcheckin-1.0-SNAPSHOT.jar checkin
+                java -jar kgcheckin-1.0-SNAPSHOT.jar checkin --rsa-delay 1200
                 java -jar kgcheckin-1.0-SNAPSHOT.jar phoneLogin --phone 12345678910
                 java -jar kgcheckin-1.0-SNAPSHOT.jar qrcodeLogin --number 2
         

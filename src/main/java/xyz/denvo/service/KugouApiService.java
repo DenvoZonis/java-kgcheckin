@@ -64,7 +64,7 @@ public final class KugouApiService {
             dataMap.put("p2", CryptoUtil.rsaEncrypt(JsonHelper.toJson(p2Data)).toUpperCase());
         } else {
             String masked = mobile.length() >= 11
-                    ? mobile.substring(0, 2) + "*****" + mobile.substring(10, 11)
+                    ? mobile.substring(0, 2) + "*****" + mobile.charAt(10)
                     : mobile;
             dataMap.put("mobile", masked);
             dataMap.put("t3", "MCwwLDAsMCwwLDAsMCwwLDA=");
@@ -191,7 +191,7 @@ public final class KugouApiService {
     @SuppressWarnings("unchecked")
     public static Map<String, Object> refreshToken(String token, String userid) throws IOException {
         boolean isLite = Config.isLite();
-        long dateNow = System.currentTimeMillis();
+        long dateNow = System.currentTimeMillis() + Config.RSA_delay_ms;
 
         Map<String, Object> tokenEncData = new LinkedHashMap<>();
         tokenEncData.put("clienttime", dateNow / 1000);

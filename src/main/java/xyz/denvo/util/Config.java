@@ -5,6 +5,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class Config {
     private Config() {}
 
+    public static long RSA_delay_ms = 0;
+
     public static final int APPID = 1005;
     public static final int LITE_APPID = 3116;
     public static final int CLIENTVER = 20489;
@@ -17,8 +19,6 @@ public final class Config {
     public static final String REGISTER_SECRET = "1014";
     public static final String SIGN_KEY_SECRET = "57ae12eb6890223e355ccfcb74edf70d";
     public static final String LITE_SIGN_KEY_SECRET = "185672dd44712f60bb1736df5a377e82";
-    public static final String SIGN_PARAMS_SECRET = "R6snCXJgbCaj9WFRJKefTMIFp0ey6Gza";
-    public static final String SIGN_CLOUD_SECRET = "ebd1ac3134c880bda6a2194537843caa0162e2e7";
 
     public static final String PUBLIC_RSA_KEY = """
             -----BEGIN PUBLIC KEY-----
