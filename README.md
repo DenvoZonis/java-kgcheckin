@@ -1,0 +1,83 @@
+# java-kgcheckin
+
+## 免责声明
+
+> [!important]
+>
+> 1. 本项目仅供学习使用，请尊重版权，请勿利用此项目从事商业行为及非法用途!
+> 2. 使用本项目的过程中可能会产生版权数据。对于这些版权数据，本项目不拥有它们的所有权。为了避免侵权，使用者务必在 24小时内清除使用本项目的过程中所产生的版权数据。
+> 3. 由于使用本项目产生的包括由于本协议或由于使用或无法使用本项目而引起的任何性质的任何直接、间接、特殊、偶然或结果性损害（包括但不限于因商誉损失、停工、计算机故障或故障引起的损害赔偿，或任何及所有其他商业损害或损失）由使用者负责。
+> 4. **禁止在违反当地法律法规的情况下使用本项目。** 对于使用者在明知或不知当地法律法规不允许的情况下使用本项目所造成的任何违法违规行为由使用者承担，本项目不承担由此造成的任何直接、间接、特殊、偶然或结果性责任。
+> 5. 音乐平台不易，请尊重版权，支持正版。
+> 6. 本项目仅用于对技术可行性的探索及研究，不接受任何商业（包括但不限于广告等）合作及捐赠。
+> 7. 如果官方音乐平台觉得本项目不妥，可联系本项目更改或移除。
+
+基于 [develop202/kgcheckin](https://github.com/develop202/kgcheckin) 和 [MakcRe/KuGouMusicApi](https://github.com/MakcRe/KuGouMusicApi) 开发的 Java 版本，用于酷狗音乐自动签到领取 VIP，方便本地或 NAS 等方式运行。需使用Java 21或更高版本。
+
+> [!warning]
+> 注意事项
+>
+> 若登录后听歌领取失败，请到APP 活动中心->天天签到领VIP(这个活动新用户好像没有) 查看当日是否已经领取VIP。
+
+## 与上游仓库的区别
+
+|        | 上游 (Node.js)               | 本项目 (Java)               |
+|--------|----------------------------|--------------------------|
+| 用户信息存储 | GitHub Access Token + 环境变量 | 本地 `users/` 目录存储 JSON 文件 |
+| 运行方式   | GitHub Actions 远程执行        | 本地 / NAS 直接运行            |
+
+本项目的设计目标是方便在本地 NAS 上部署运行，无需依赖 GitHub 和环境变量，用户登录凭证直接保存在本地文件中。
+
+## Windows 用户注意
+
+日志框架默认使用 UTF-8 编码输出，而 Windows 终端默认使用 GBK 编码，直接运行中文会显示乱码。请在运行前先切换代码页：
+
+```powershell
+chcp 65001
+```
+
+## 构建
+
+Maven版本：3.6+
+
+```bash
+# 编译
+mvn compile
+
+# 打包为可执行 jar
+mvn package
+```
+
+打包后的 jar 文件位于 `target/kgcheckin-1.0-SNAPSHOT.jar`。
+
+## 使用
+
+```bash
+java -jar target/kgcheckin-1.0-SNAPSHOT.jar <命令> [参数]
+```
+
+### 命令
+
+| 命令 | 说明 |
+|---|---|
+| `phoneLogin --phone <手机号>` | 手机验证码登录，发送验证码后提示输入验证码 |
+| `qrcodeLogin [--number N]` | 二维码登录，控制台输出二维码图片，N 为账号数量（默认 1） |
+| `checkin` | 遍历 `users/` 目录下所有已登录用户，自动签到领取 VIP |
+
+### 示例
+
+```bash
+# 手机号登录
+java -jar target/kgcheckin-1.0-SNAPSHOT.jar phoneLogin --phone 12345678910
+
+# 二维码登录（默认 1 个账号）
+java -jar target/kgcheckin-1.0-SNAPSHOT.jar qrcodeLogin
+
+# 二维码登录（批量 3 个账号）
+java -jar target/kgcheckin-1.0-SNAPSHOT.jar qrcodeLogin --number 3
+
+# 对所有已登录用户签到
+java -jar target/kgcheckin-1.0-SNAPSHOT.jar checkin
+```
+
+登录成功后，用户凭证自动保存到 `users/<userid>.json`，后续 `checkin` 命令会自动加载。
