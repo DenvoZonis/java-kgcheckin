@@ -3,6 +3,7 @@ package xyz.denvo;
 import xyz.denvo.cli.MainCheckin;
 import xyz.denvo.cli.PhoneLogin;
 import xyz.denvo.cli.QrcodeLogin;
+import xyz.denvo.util.AppConfig;
 
 public class App {
     public static void main(String[] args) throws Exception {
@@ -16,7 +17,8 @@ public class App {
 
         switch (command) {
             case "checkin":
-                long rsaDelay = 0;
+                AppConfig.load();
+                long rsaDelay = AppConfig.getLong("rsaDelay", 0);
                 for (int i = 0; i < remaining.length; i++) {
                     if ("--rsa-delay".equals(remaining[i]) && i + 1 < remaining.length) {
                         rsaDelay = Long.parseLong(remaining[++i]);
@@ -54,6 +56,9 @@ public class App {
                 checkin [--rsa-delay <ms>]       自动签到领取VIP (遍历users/目录, 可设置RSA延迟毫秒数)
                 phoneLogin --phone <手机号>      手机号登录 (发送验证码后通过标准输入输入验证码)
                 qrcodeLogin [--number N]        二维码登录 (N为账号数,默认1)
+        
+            执行 checkin 的参数可写入与 jar 同目录的 config.ini, 无需在命令行传入, 详见 README。
+            为了兼容性，命令行传入参数目前仅支持 --esa-delay 且优先级高于配置文件。
         
             示例:
                 java -jar kgcheckin-1.1-SNAPSHOT.jar checkin
