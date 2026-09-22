@@ -110,6 +110,41 @@ retryInterval = 3000
 
 已经成功的步骤不会被重复执行。`今日已领取`、`今天次数已用光` 属于正常的终态，不会触发重试。重试全部用尽后仍失败，才会按原有逻辑记录到异常信息中。
 
+### 邮件通知（可选）
+
+在 NAS 上跑定时任务时，失败往往没人注意到。开启邮件通知后，`checkin` 失败会发一封邮件提醒需要人工接管。**该功能默认关闭**，把 `mailEnabled` 改为 `true` 并填写下面的 SMTP 信息即可：
+
+```ini
+# 签到失败时是否发送邮件通知，默认 false（关闭）
+mailEnabled = true
+
+# SMTP 服务器地址，例如 smtp.qq.com
+mailHost = smtp.qq.com
+
+# SMTP 服务器端口，例如 465
+mailPort = 465
+
+# 是否使用 SSL 直连。端口 465 填 true；
+# 填 false 时使用 STARTTLS，服务端不支持则退回明文
+mailSsl = true
+
+# SMTP 登录账号
+mailUsername = your@qq.com
+
+# SMTP 登录密码或授权码，多数邮箱需要填授权码而不是网页登录密码
+mailPassword = xxxxxxxxxxxxxxxx
+
+# 收件人地址，多个收件人用英文逗号分隔
+mailTo = you@example.com, other@example.com
+```
+
+以下情况都会发信：有账号签到失败、`users` 目录为空、以及重试耗尽后仍未恢复的网络异常。签到成功不会发信。
+
+若启用了但 `mailHost` / `mailUsername` / `mailTo` 没填全，程序会打一条错误日志并跳过发送，不会影响签到本身的退出码；邮件发送失败同理，只记日志。
+
+> [!warning]
+> `mailPassword` 以明文保存在 `config.ini` 中，请注意该文件的权限，并使用邮箱的授权码而不是账号登录密码。
+
 ## FAQ
 
 ### 为什么在 NAS 或低配置 Linux 上运行会提示 token过期或账号不存在？

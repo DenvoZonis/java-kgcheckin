@@ -1,6 +1,7 @@
 package xyz.denvo.cli;
 
 import xyz.denvo.service.KugouApiService;
+import xyz.denvo.service.MailService;
 import xyz.denvo.util.AppConfig;
 import xyz.denvo.util.Config;
 import xyz.denvo.util.JsonHelper;
@@ -19,12 +20,24 @@ public class MainCheckin {
 
     private static final Logger LOG = LoggerFactory.getLogger(MainCheckin.class);
     private static final ZoneId BEIJING = ZoneId.of("Asia/Shanghai");
+    private static final String MAIL_SUBJECT = "[kgcheckin] 签到失败，需要人工处理";
 
     private static int retryCount;
     private static long retryIntervalMs;
 
-    @SuppressWarnings("unchecked")
+    /** 执行过程中任何未捕获的异常都会在这里补发通知邮件，之后原样抛出。 */
     public static void run(long rsaDelayMs) throws Exception {
+        try {
+            checkin(rsaDelayMs);
+        } catch (Exception e) {
+            LOG.error("签到过程中断: {}", e.toString());
+            notifyFailure("执行过程中断", e.toString());
+            throw e;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void checkin(long rsaDelayMs) throws Exception {
         Config.RSA_delay_ms = rsaDelayMs;
         retryCount = (int) Math.max(0, AppConfig.getLong("retryCount", 2));
         retryIntervalMs = Math.max(0, AppConfig.getLong("retryInterval", 3000));
@@ -32,6 +45,7 @@ public class MainCheckin {
         List<Map<String, Object>> users = UserStore.loadAllUsers();
         if (users.isEmpty()) {
             LOG.error("users目录中没有用户文件，请先运行 phoneLogin 或 qrcodeLogin 登录");
+            notifyFailure("users目录中没有用户文件，请先运行 phoneLogin 或 qrcodeLogin 登录", null);
             System.exit(1);
             return;
         }
@@ -143,11 +157,25 @@ public class MainCheckin {
 
         if (!errorMsg.isEmpty()) {
             LOG.error("异常信息如下:");
-            System.out.println(JsonHelper.GSON.toJson(errorMsg));
+            String detail = JsonHelper.GSON.toJson(errorMsg);
+            System.out.println(detail);
+            notifyFailure("有账号签到失败", detail);
             System.exit(1);
         }
 
         System.exit(0);
+    }
+
+    /** 发送失败通知邮件，未启用邮件通知时是空操作。 */
+    private static void notifyFailure(String reason, String detail) {
+        String now = ZonedDateTime.now(BEIJING).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        StringBuilder body = new StringBuilder()
+                .append("时间: ").append(now)
+                .append("\n原因: ").append(reason);
+        if (detail != null) {
+            body.append("\n\n").append(detail);
+        }
+        MailService.send(MAIL_SUBJECT, body.toString());
     }
 
     /** 可重试的请求。 */

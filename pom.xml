@@ -62,6 +62,17 @@
             <artifactId>log4j-core</artifactId>
             <version>2.25.4</version>
         </dependency>
+        <!-- SMTP 邮件通知 -->
+        <dependency>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+            <version>2.0.5</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -87,6 +98,8 @@
                         </goals>
                         <configuration>
                             <transformers>
+                                <!-- Jakarta Mail 通过 META-INF/services 查找 provider, 必须保留 -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <!-- Main-Class -->
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>xyz.denvo.App</mainClass>

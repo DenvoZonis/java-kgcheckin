@@ -53,7 +53,23 @@ public final class AppConfig {
             new Entry("retryCount", "2",
                     "请求失败后的重试次数，默认 2。填 0 表示不重试。"),
             new Entry("retryInterval", "3000",
-                    "每次重试之间的固定间隔（毫秒），默认 3000。"));
+                    "每次重试之间的固定间隔（毫秒），默认 3000。"),
+            new Entry("mailEnabled", "false",
+                    "签到失败时是否发送邮件通知，默认 false（关闭）。\n"
+                            + "改为 true 后需同时填写下面几项。"),
+            new Entry("mailHost", "",
+                    "SMTP 服务器地址，例如 smtp.qq.com。"),
+            new Entry("mailPort", "465",
+                    "SMTP 服务器端口，例如 465。"),
+            new Entry("mailSsl", "true",
+                    "是否使用 SSL 直连。端口 465 填 true；\n"
+                            + "填 false 时使用 STARTTLS，服务端不支持则退回明文。"),
+            new Entry("mailUsername", "",
+                    "SMTP 登录账号。"),
+            new Entry("mailPassword", "",
+                    "SMTP 登录密码或授权码。多数邮箱需要填授权码，而不是网页登录密码。"),
+            new Entry("mailTo", "",
+                    "收件人地址，多个收件人用英文逗号分隔。"));
 
     private static final Map<String, String> VALUES = new LinkedHashMap<>();
     private static Path loadedPath;
@@ -90,6 +106,11 @@ public final class AppConfig {
         return loadedPath;
     }
 
+    public static String getString(String key, String defaultValue) {
+        String value = VALUES.get(key);
+        return (value == null || value.isEmpty()) ? defaultValue : value;
+    }
+
     public static long getLong(String key, long defaultValue) {
         String value = VALUES.get(key);
         if (value == null || value.isEmpty()) {
@@ -101,6 +122,21 @@ public final class AppConfig {
             LOG.warn("配置项 {} 的值 \"{}\" 不是合法整数，使用默认值 {}", key, value, defaultValue);
             return defaultValue;
         }
+    }
+
+    public static boolean getBoolean(String key, boolean defaultValue) {
+        String value = VALUES.get(key);
+        if (value == null || value.isEmpty()) {
+            return defaultValue;
+        }
+        return switch (value.toLowerCase()) {
+            case "true", "yes", "1", "on" -> true;
+            case "false", "no", "0", "off" -> false;
+            default -> {
+                LOG.warn("配置项 {} 的值 \"{}\" 不是合法布尔值，使用默认值 {}", key, value, defaultValue);
+                yield defaultValue;
+            }
+        };
     }
 
     private static Path locate() {
