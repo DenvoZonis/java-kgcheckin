@@ -48,12 +48,12 @@ mvn compile
 mvn package
 ```
 
-打包后的 jar 文件位于 `target/kgcheckin-1.0-SNAPSHOT.jar`。
+打包后的 jar 文件位于 `target/kgcheckin-1.2-SNAPSHOT.jar`。
 
 ## 使用
 
 ```bash
-java -jar target/kgcheckin-1.0-SNAPSHOT.jar <命令> [参数]
+java -jar target/kgcheckin-1.2-SNAPSHOT.jar <命令> [参数]
 ```
 
 ### 命令
@@ -68,16 +68,16 @@ java -jar target/kgcheckin-1.0-SNAPSHOT.jar <命令> [参数]
 
 ```bash
 # 手机号登录
-java -jar target/kgcheckin-1.0-SNAPSHOT.jar phoneLogin --phone 12345678910
+java -jar target/kgcheckin-1.2-SNAPSHOT.jar phoneLogin --phone 12345678910
 
 # 二维码登录（默认 1 个账号）
-java -jar target/kgcheckin-1.0-SNAPSHOT.jar qrcodeLogin
+java -jar target/kgcheckin-1.2-SNAPSHOT.jar qrcodeLogin
 
 # 二维码登录（批量 3 个账号）
-java -jar target/kgcheckin-1.0-SNAPSHOT.jar qrcodeLogin --number 3
+java -jar target/kgcheckin-1.2-SNAPSHOT.jar qrcodeLogin --number 3
 
 # 对所有已登录用户签到
-java -jar target/kgcheckin-1.0-SNAPSHOT.jar checkin
+java -jar target/kgcheckin-1.2-SNAPSHOT.jar checkin
 ```
 
 登录成功后，用户凭证自动保存到 `users/<userid>.json`，后续 `checkin` 命令会自动加载。
